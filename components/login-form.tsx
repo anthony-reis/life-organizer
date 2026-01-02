@@ -1,3 +1,4 @@
+// components/login-form.tsx
 "use client";
 
 import { cn } from "@/lib/utils";
@@ -44,18 +45,20 @@ export function LoginForm({
 
       toast.success("Login realizado com sucesso! 🎉");
 
-      // Força refresh do servidor para atualizar o header
-      router.refresh();
+      // IMPORTANTE: Aguardar um pouco antes de redirecionar
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // Redireciona para home
+      // Redirecionar primeiro
       router.push("/");
+
+      // Depois refresh para atualizar o header
+      router.refresh();
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "Ocorreu um erro";
       setError(errorMessage);
       toast.error(errorMessage);
-    } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Só desabilita loading se der erro
     }
   };
 

@@ -3,12 +3,10 @@
 
 import { Button } from "./ui/button";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
 export function LogoutButton() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const handleLogout = async () => {
@@ -20,11 +18,10 @@ export function LogoutButton() {
 
       toast.success("Logout realizado com sucesso!");
 
-      router.refresh();
-      router.push("/auth/login");
+      // Força reload completo da página (igual F5)
+      window.location.href = "/auth/login";
     } catch (error) {
       toast.error("Erro ao fazer logout");
-    } finally {
       setLoading(false);
     }
   };
