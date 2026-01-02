@@ -20,10 +20,7 @@ export function LogoutButton() {
 
       toast.success("Logout realizado com sucesso!");
 
-      // Força refresh do servidor
       router.refresh();
-
-      // Redireciona para login
       router.push("/auth/login");
     } catch (error) {
       toast.error("Erro ao fazer logout");

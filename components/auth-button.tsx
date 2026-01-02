@@ -1,4 +1,4 @@
-// components/auth-button.tsx
+// components/auth-button.tsx (Server Component - SEM "use client")
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { createClient } from "@/lib/supabase/server";
@@ -16,7 +16,7 @@ export async function AuthButton() {
       <span className="text-sm text-gray-600 dark:text-gray-400 hidden sm:inline">
         Hey, {user.email}!
       </span>
-      <span className="text-sm text-gray-600 dark:text-gray-400 sm:hidden">
+      <span className="text-sm text-gray-600 dark:text-gray-400 sm:hidden truncate max-w-[120px]">
         {user.email?.split("@")[0]}
       </span>
       <LogoutButton />
