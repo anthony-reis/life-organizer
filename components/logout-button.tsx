@@ -1,17 +1,45 @@
+// components/logout-button.tsx
 "use client";
 
+import { Button } from "./ui/button";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "react-toastify";
 
 export function LogoutButton() {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
-  const logout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/auth/login");
+  const handleLogout = async () => {
+    setLoading(true);
+
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+
+      toast.success("Logout realizado com sucesso!");
+
+      // Força refresh do servidor
+      router.refresh();
+
+      // Redireciona para login
+      router.push("/auth/login");
+    } catch (error) {
+      toast.error("Erro ao fazer logout");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  return <Button onClick={logout}>Logout</Button>;
+  return (
+    <Button
+      onClick={handleLogout}
+      disabled={loading}
+      size="sm"
+      variant="outline"
+    >
+      {loading ? "Saindo..." : "Sair"}
+    </Button>
+  );
 }
