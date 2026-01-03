@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Check, Book, MessageSquare, Edit2, Save, X } from "lucide-react";
 import { marcarSemana, salvarAnotacao } from "../actions";
 import { toast } from "react-toastify";
@@ -23,6 +23,33 @@ export default function ReadingWeeks({ plano }: { plano: PlanoItem[] }) {
     Object.fromEntries(plano.map((p) => [p.id, p.observacoes || ""]))
   );
   const [notaTemp, setNotaTemp] = useState("");
+
+  // Estado para semana atual
+  const [semanaAtual, setSemanaAtual] = useState(() =>
+    Math.ceil(
+      (new Date().getTime() -
+        new Date(new Date().getFullYear(), 0, 1).getTime()) /
+        (7 * 24 * 60 * 60 * 1000)
+    )
+  );
+
+  // Atualizar semana atual a cada minuto
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const novaSemana = Math.ceil(
+        (new Date().getTime() -
+          new Date(new Date().getFullYear(), 0, 1).getTime()) /
+          (7 * 24 * 60 * 60 * 1000)
+      );
+
+      if (novaSemana !== semanaAtual) {
+        setSemanaAtual(novaSemana);
+        console.log(`📅 Semana atualizada: ${novaSemana}`);
+      }
+    }, 60000); // Verifica a cada 1 minuto
+
+    return () => clearInterval(interval);
+  }, [semanaAtual]);
 
   const handleToggle = async (
     semana: number,
@@ -75,18 +102,14 @@ export default function ReadingWeeks({ plano }: { plano: PlanoItem[] }) {
     setNotaTemp("");
   };
 
-  // Semana atual do ano
-  const semanaAtual = Math.ceil(
-    (new Date().getTime() -
-      new Date(new Date().getFullYear(), 0, 1).getTime()) /
-      (7 * 24 * 60 * 60 * 1000)
-  );
-
   return (
     <div className="p-6 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
       <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-2">
         <Book className="w-6 h-6 text-cyan-500" />
         Leitura Semanal
+        <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
+          (Semana {semanaAtual})
+        </span>
       </h2>
 
       <div className="space-y-3">
@@ -142,8 +165,8 @@ export default function ReadingWeeks({ plano }: { plano: PlanoItem[] }) {
                       Sem {item.semana}
                     </span>
                     {isSemanaAtual && (
-                      <span className="text-xs font-semibold text-cyan-600 uppercase">
-                        Atual
+                      <span className="text-xs font-semibold text-cyan-600 dark:text-cyan-400 uppercase animate-pulse">
+                        📖 Atual
                       </span>
                     )}
                   </div>

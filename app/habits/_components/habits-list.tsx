@@ -224,26 +224,9 @@ export default function HabitsList({
                               🎯 Hoje: {treinoHoje}
                             </p>
                           )}
-                          <p className="text-xs font-semibold text-orange-700 dark:text-orange-400 uppercase mb-2">
-                            🏋️ Dias de Treino
-                          </p>
-                          <div className="flex gap-1">
-                            {[0, 1, 2, 3, 4, 5, 6].map((dia) => (
-                              <span
-                                key={dia}
-                                className={`text-xs px-2 py-1 rounded font-semibold ${
-                                  diasTreino.includes(dia)
-                                    ? "bg-orange-500 text-white"
-                                    : "bg-gray-200 dark:bg-gray-700 text-gray-400"
-                                }`}
-                              >
-                                {diasSemanaLabel[dia]}
-                              </span>
-                            ))}
-                          </div>
                         </div>
                         <Link
-                          href="/workouts"
+                          href="/workout"
                           className="p-2 rounded-lg text-orange-600 hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors"
                         >
                           <ExternalLink className="w-4 h-4" />
