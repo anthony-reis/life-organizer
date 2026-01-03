@@ -7,7 +7,6 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
-  const next = "/auth/login"; // Mudar para ir para login
 
   if (token_hash && type) {
     const supabase = await createClient();
@@ -18,10 +17,21 @@ export async function GET(request: NextRequest) {
     });
 
     if (!error) {
-      // Sucesso - redirecionar para login
-      redirect(next);
+      console.log("✅ Email confirmado com sucesso!");
+      redirect("/auth/login?confirmed=true");
     } else {
-      // Erro na verificação
+      console.error("❌ Erro ao verificar OTP:", error);
+
+      // 🔥 VERIFICAR SE USUÁRIO JÁ FOI CONFIRMADO
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user && user.email_confirmed_at) {
+        console.log("✅ Usuário já confirmado anteriormente");
+        redirect("/auth/login?confirmed=true");
+      }
+
       redirect(`/auth/error?error=${encodeURIComponent(error.message)}`);
     }
   }
