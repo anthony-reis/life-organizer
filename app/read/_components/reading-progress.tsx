@@ -1,4 +1,3 @@
-// app/reading/_components/reading-progress.tsx
 "use client";
 
 import { Award, Trophy } from "lucide-react";

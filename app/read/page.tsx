@@ -1,4 +1,3 @@
-// app/reading/page.tsx
 import { createClient } from "@/lib/supabase/server";
 import { Suspense } from "react";
 

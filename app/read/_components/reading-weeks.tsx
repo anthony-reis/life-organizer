@@ -1,4 +1,3 @@
-// app/reading/_components/reading-weeks.tsx
 "use client";
 
 import { useState } from "react";
