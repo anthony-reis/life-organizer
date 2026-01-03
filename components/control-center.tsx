@@ -3,6 +3,7 @@
 import {
   AppleIcon,
   BookOpenTextIcon,
+  DollarSignIcon,
   DumbbellIcon,
   ListTodoIcon,
 } from "lucide-react";
@@ -84,15 +85,15 @@ function ControlCenter() {
       </Link>
 
       <Link
-        href="/diet"
-        onClick={(e) => handleNavigation(e, "/diet")}
-        className="flex items-center gap-4 p-6 rounded-xl bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 border border-cyan-500/20 hover:border-cyan-500/40 hover:shadow-lg hover:shadow-cyan-500/10 transition-all duration-300 group"
+        href="/"
+        onClick={(e) => handleNavigation(e, "/")}
+        className="flex items-center gap-4 p-6 rounded-xl bg-gradient-to-br from-zinc-500/10 to-zinc-600/5 border border-zinc-500/20 hover:border-zinc-500/40 hover:shadow-lg hover:shadow-zinc-500/10 transition-all duration-300 group"
       >
-        <div className="p-3 rounded-lg bg-cyan-500/10 group-hover:bg-cyan-500/20 transition-colors">
-          <AppleIcon className="w-6 h-6 text-cyan-500" />
+        <div className="p-3 rounded-lg bg-zinc-500/10 group-hover:bg-zinc-500/20 transition-colors">
+          <DollarSignIcon className="w-6 h-6 text-zinc-500" />
         </div>
-        <span className="font-semibold text-lg text-gray-800 dark:text-gray-100 group-hover:text-cyan-500 transition-colors">
-          Dieta
+        <span className="font-semibold text-lg text-gray-800 dark:text-zinc-500 group-hover:text-zinc-500 transition-colors">
+          Financeiro
         </span>
       </Link>
 

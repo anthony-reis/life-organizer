@@ -4,8 +4,9 @@ import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import WorkoutSession from "./_components/workout-session";
 import DaysCarousel from "./_components/days-carousel";
-import { CheckCircle2, Dumbbell } from "lucide-react";
+import { CheckCircle2, Dumbbell, Settings, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { toast } from "react-toastify";
 
 const DIA_SEMANA_MAP: Record<number, string> = {
   0: "domingo",
@@ -81,6 +82,35 @@ export default function WorkoutPage() {
     setLoading(false);
   }
 
+  const deletarTreino = async () => {
+    if (
+      !confirm(
+        "Tem certeza que deseja apagar este treino? Isso também desmarcará o hábito deste dia."
+      )
+    )
+      return;
+
+    try {
+      const dataStr = selectedDate!.toISOString().split("T")[0];
+
+      const response = await fetch("/api/workout/delete-workout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data_treino: dataStr }),
+      });
+
+      if (response.ok) {
+        toast.success("Treino apagado! 🗑️");
+        loadWorkout();
+      } else {
+        toast.error("Erro ao apagar treino");
+      }
+    } catch (error) {
+      console.error("Erro:", error);
+      toast.error("Erro ao apagar treino");
+    }
+  };
+
   if (!selectedDate) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -118,9 +148,20 @@ export default function WorkoutPage() {
     <div className="px-5 py-8 max-w-4xl mx-auto">
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-3">
-          <Dumbbell className="w-8 h-8 text-cyan-500" />
-          <h1 className="text-3xl font-bold text-foreground">Treino</h1>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Dumbbell className="w-8 h-8 text-cyan-500" />
+            <h1 className="text-3xl font-bold text-foreground">Treino</h1>
+          </div>
+          {user && (
+            <Link
+              href="/workout/manage"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-500 text-white font-semibold hover:bg-cyan-600 transition-colors"
+            >
+              <Settings className="w-5 h-5" />
+              Gerenciar
+            </Link>
+          )}
         </div>
 
         {/* Calendário */}
@@ -149,7 +190,7 @@ export default function WorkoutPage() {
                       "pt-BR"
                     )}`}
               </p>
-              <div className="flex gap-4 justify-center text-sm">
+              <div className="flex gap-4 justify-center text-sm mb-4">
                 <span className="px-3 py-1 rounded-full bg-green-500/20 text-green-700 dark:text-green-400 font-semibold">
                   {[...new Set(treinoFeito.map((t) => t.exercicio))].length}{" "}
                   exercícios
@@ -158,6 +199,15 @@ export default function WorkoutPage() {
                   {treinoFeito.length} séries
                 </span>
               </div>
+
+              {/* Botão para apagar treino */}
+              <button
+                onClick={deletarTreino}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/10 text-red-600 hover:bg-red-500 hover:text-white font-semibold transition-all text-sm"
+              >
+                <Trash2 className="w-4 h-4" />
+                Apagar este treino
+              </button>
             </div>
 
             {/* Resumo do treino */}
@@ -202,7 +252,10 @@ export default function WorkoutPage() {
             <h2 className="capitalize font-bold text-2xl text-cyan-600 mb-6">
               Treino de {DIA_SEMANA_MAP[selectedDate.getDay()]} 🔥
             </h2>
-            <WorkoutSession exercises={workoutToday} />
+            <WorkoutSession
+              exercises={workoutToday}
+              selectedDate={selectedDate}
+            />
           </div>
         ) : (
           // Dia de descanso

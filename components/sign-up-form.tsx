@@ -35,7 +35,13 @@ export function SignUpForm({
     setError(null);
 
     if (password !== repeatPassword) {
-      setError("Passwords do not match");
+      setError("As senhas não coincidem");
+      setIsLoading(false);
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("A senha deve ter pelo menos 6 caracteres");
       setIsLoading(false);
       return;
     }
@@ -45,13 +51,33 @@ export function SignUpForm({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/protected`,
+          emailRedirectTo: `${
+            process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
+          }/auth/callback`,
         },
       });
-      if (error) throw error;
-      router.push("/auth/sign-up-success");
+
+      if (error) {
+        if (error.message.includes("already registered")) {
+          throw new Error("Este email já está cadastrado");
+        }
+        if (error.message.includes("invalid email")) {
+          throw new Error("Email inválido");
+        }
+        if (error.message.includes("weak password")) {
+          throw new Error("Senha muito fraca");
+        }
+        throw error;
+      }
+
+      // Redirecionar para página de "aguardando confirmação"
+      router.push("/auth/confirm-email");
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Ocorreu um erro ao criar a conta"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -75,45 +101,52 @@ export function SignUpForm({
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="seu@email.com"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
                 />
               </div>
               <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Senha</Label>
-                </div>
+                <Label htmlFor="password">Senha</Label>
                 <Input
                   id="password"
                   type="password"
+                  placeholder="Mínimo 6 caracteres"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
                 />
               </div>
               <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="repeat-password">Repita a Senha</Label>
-                </div>
+                <Label htmlFor="repeat-password">Repita a Senha</Label>
                 <Input
                   id="repeat-password"
                   type="password"
+                  placeholder="Digite a senha novamente"
                   required
                   value={repeatPassword}
                   onChange={(e) => setRepeatPassword(e.target.value)}
+                  disabled={isLoading}
                 />
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
+              {error && (
+                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                  <p className="text-sm text-red-600 dark:text-red-400">
+                    {error}
+                  </p>
+                </div>
+              )}
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Criando uma conta..." : "Cadastrar"}
+                {isLoading ? "Criando conta..." : "Cadastrar"}
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
               Já tem uma conta?{" "}
               <Link href="/auth/login" className="underline underline-offset-4">
-                Login
+                Fazer login
               </Link>
             </div>
           </form>

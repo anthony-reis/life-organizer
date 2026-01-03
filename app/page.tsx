@@ -1,6 +1,5 @@
 import ControlCenter from "@/components/control-center";
 import { Hero } from "@/components/hero";
-import { ThemeSwitcher } from "@/components/theme-switcher";
 
 export default function Home() {
   return (

@@ -20,8 +20,10 @@ type Serie = {
 
 export default function WorkoutSession({
   exercises,
+  selectedDate,
 }: {
   exercises: Exercise[];
+  selectedDate: Date;
 }) {
   const [currentExercise, setCurrentExercise] = useState(0);
   const [series, setSeries] = useState<Serie[]>([]);
@@ -51,26 +53,36 @@ export default function WorkoutSession({
     setIsLoading(true);
 
     try {
+      const dataStr = selectedDate.toISOString().split("T")[0];
+
       const response = await fetch("/api/workout/save-series", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           treino_exercicio_id: exercise.treino_exercicio_id,
           series: series,
+          data_treino: dataStr, // Enviar a data selecionada
         }),
       });
+
       if (response.ok) {
         if (currentExercise < exercises.length - 1) {
           setCurrentExercise(currentExercise + 1);
           setSeries([]);
         } else {
-          toast.success("Treino finalizado! 💪🔥");
-          window.location.href = "/";
+          toast.success("🎉 Treino finalizado e hábito marcado! 💪✅", {
+            autoClose: 2000,
+          });
+          setTimeout(() => {
+            window.location.href = "/workout";
+          }, 1500);
         }
+      } else {
+        toast.error("Erro ao salvar séries");
       }
     } catch (error) {
       console.error("Erro ao salvar:", error);
-      alert("Erro ao salvar séries");
+      toast.error("Erro ao salvar séries");
     } finally {
       setIsLoading(false);
     }

@@ -28,7 +28,6 @@ export default function HabitsPage() {
   const [treinoHoje, setTreinoHoje] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Inicializar data no useEffect para evitar warning
   useEffect(() => {
     if (!selectedDate) {
       setSelectedDate(new Date());
@@ -108,14 +107,19 @@ export default function HabitsPage() {
         (7 * 24 * 60 * 60 * 1000)
     );
 
-    const { data: livro } = await supabase
+    const { data: livro, error: livroError } = await supabase
       .from("plano_leitura")
       .select("*")
       .eq("user_id", user.id)
       .eq("ano", selectedDate.getFullYear())
       .eq("semana", semana)
-      .single();
-    setLivroSemana(livro);
+      .maybeSingle();
+
+    if (livroError) {
+      console.log("Aviso: Nenhum livro encontrado para a semana", semana);
+    }
+
+    setLivroSemana(livro || null);
 
     // Buscar hábitos
     const { data: todosHabitos } = await supabase
@@ -144,15 +148,41 @@ export default function HabitsPage() {
       }) || [];
 
     const habitosDia = habitosComTracking.filter((h) => {
-      if (h.periodicidade === "DIARIO") return true;
+      // 🔥 VERIFICAR SE ESTÁ DENTRO DO RANGE DE DATAS
+      if (h.data_inicio && h.data_fim) {
+        const dataInicio = new Date(h.data_inicio);
+        const dataFim = new Date(h.data_fim);
+        const dataSelecionada = new Date(selectedDate);
+
+        dataInicio.setHours(0, 0, 0, 0);
+        dataFim.setHours(0, 0, 0, 0);
+        dataSelecionada.setHours(0, 0, 0, 0);
+
+        if (dataSelecionada < dataInicio || dataSelecionada > dataFim) {
+          return false; // Fora do range
+        }
+
+        // 🔥 SE ESTÁ DENTRO DO RANGE, MOSTRAR (ignora dias_semana!)
+        return true;
+      }
+
+      // 🔥 DAQUI PRA BAIXO: Apenas hábitos SEM data_inicio/data_fim
+
+      // Verificar periodicidade
+      if (h.periodicidade === "DIARIO") {
+        return true;
+      }
+
       if (
         ["SEMANAL", "TRES_SEMANA", "CINCO_SEMANA"].includes(h.periodicidade)
       ) {
         return h.dias_semana?.includes(diaSemanaSelected);
       }
+
       if (h.periodicidade === "MENSAL") {
         return selectedDate.getDate() === h.dia_mes;
       }
+
       if (h.periodicidade === "QUINZENAL") {
         const dataInicio = new Date(h.data_inicio);
         const diff = Math.floor(
@@ -161,6 +191,7 @@ export default function HabitsPage() {
         );
         return diff % 15 === 0;
       }
+
       return false;
     });
 

@@ -1,17 +1,27 @@
+// app/read/page.tsx
 import { createClient } from "@/lib/supabase/server";
 import { Suspense } from "react";
-
 import { BookOpen } from "lucide-react";
 import ReadingProgress from "./_components/reading-progress";
 import ReadingWeeks from "./_components/reading-weeks";
+import AddBookButton from "./_components/add-book-button";
 
 async function ReadingPlan() {
   const supabase = await createClient();
   const anoAtual = new Date().getFullYear();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return <div>Por favor, faça login para ver seu plano de leitura.</div>;
+  }
+
   const { data: plano } = await supabase
     .from("plano_leitura")
     .select("*")
+    .eq("user_id", user.id)
     .eq("ano", anoAtual)
     .order("semana");
 
@@ -21,13 +31,19 @@ async function ReadingPlan() {
     .order("semanas_necessarias");
 
   const semanasCompletas = plano?.filter((p) => p.concluido).length || 0;
+  const semanasOcupadas = plano?.map((p) => p.semana) || [];
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <BookOpen className="w-8 h-8 text-cyan-500" />
-        <h1 className="text-3xl font-bold text-cyan-600">Leitura {anoAtual}</h1>
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex items-center gap-3">
+          <BookOpen className="w-8 h-8 text-cyan-500" />
+          <h1 className="text-3xl font-bold text-cyan-600">
+            Leitura {anoAtual}
+          </h1>
+        </div>
+        <AddBookButton semanasOcupadas={semanasOcupadas} />
       </div>
 
       {/* Progresso */}

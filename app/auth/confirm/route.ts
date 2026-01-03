@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
-  const next = searchParams.get("next") ?? "/";
+  const next = "/auth/login"; // Mudar para ir para login
 
   if (token_hash && type) {
     const supabase = await createClient();
@@ -16,15 +16,16 @@ export async function GET(request: NextRequest) {
       type,
       token_hash,
     });
+
     if (!error) {
-      // redirect user to specified redirect URL or root of app
+      // Sucesso - redirecionar para login
       redirect(next);
     } else {
-      // redirect the user to an error page with some instructions
-      redirect(`/auth/error?error=${error?.message}`);
+      // Erro na verificação
+      redirect(`/auth/error?error=${encodeURIComponent(error.message)}`);
     }
   }
 
-  // redirect the user to an error page with some instructions
-  redirect(`/auth/error?error=No token hash or type`);
+  // Token inválido
+  redirect(`/auth/error?error=Token inválido ou expirado`);
 }

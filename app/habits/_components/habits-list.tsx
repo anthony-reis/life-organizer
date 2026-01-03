@@ -51,6 +51,16 @@ export default function HabitsList({
   const [editando, setEditando] = useState<Habito | null>(null);
   const router = useRouter();
 
+  if (!habitos || !Array.isArray(habitos)) {
+    return (
+      <div className="p-12 text-center rounded-xl bg-gray-50 dark:bg-gray-800/50 border-2 border-dashed border-gray-300 dark:border-gray-700">
+        <p className="text-gray-500 dark:text-gray-400">
+          Carregando hábitos...
+        </p>
+      </div>
+    );
+  }
+
   const handleMarcar = async (habitoId: number, concluido: boolean) => {
     setLoading(habitoId);
 
